@@ -1,7 +1,14 @@
 package main
 
 // я хочу написать код калькулятора
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"math"
+	"os"
+	"strconv"
+	"strings"
+)
 
 
 
@@ -20,40 +27,92 @@ func multiply(a, b float64) float64 {
 func divide(a, b float64) float64 {
   return a / b
 }
-func main() {
-	fmt.Println("Welcome to calculator")
 
+func power (a, b float64) float64 {
+	return math.Pow(a, b)
+}
+
+func modulus(a, b float64) float64 {
+	return math.Mod(a, b)
+}
+
+func calculate(expression string) (float64, error) {
+	var result float64
+	var err error
+	var op string
+	var a, b float64
+
+	switch {
+	case strings.Contains(expression, "**"):
+		op = "**"
+	case strings.Contains(expression, "%"):
+		op = "%"
+	case strings.Contains(expression, "+"):
+		op = "+"
+	case strings.Contains(expression, "-"):
+		op = "-"
+	case strings.Contains(expression, "*"):
+		op = "*"
+	case strings.Contains(expression, "/"):
+		op = "/"
+		default:
+			return -1, fmt.Errorf("Неверная операция, пожалуйста проверьте правильность операции")
 	
-
-	// создать функцию для добавления чисел
-	// создать функцию для вычитания чисел
-
-	// создать функцию для умножения чисел
-	// создать функцию для деления чисел
-
-	// теперь нужно эти функции реализовать внутри main функции
-	// что бы получился калькулятор
-
-	var a, b, result float64
-	fmt.Print("Введите первое число:")
-	fmt.Scan(&a)
-	fmt.Print("Введите второе число:")
-	fmt.Scan(&b)
-	fmt.Print("Выберите операцию:\n1 - Сложение\n2 - Вычитание\n3 - Умножение\n4 - Деление\n")
-	var op int
-	fmt.Scan(&op)
-	
-	switch op {
-	case 1: 
-		result = add(a, b)
-	case 2:
-		result = subtract(a, b)
-	case 3: 
-		result = multiply(a, b)
-	case 4: 
-		result = divide(a,b)		
-	default:
-		(fmt.Println("Неверная операция, пожалуйста проверьте правильность операции"))	
+			
 	}
-	fmt.Printf("Результат операции: %.2f\n", result)
+
+	parts := strings.Split(expression, op)
+	if len(parts) != 2 {
+		return 0, fmt.Errorf("Неверная операция, пожалуйста проверьте правильность операции")
+	}
+
+	a, err = strconv.ParseFloat(strings.TrimSpace(parts[0]), 64)
+	if err != nil {
+		return 0, fmt.Errorf("Неверное первое число")
+	}
+
+	b, err = strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+	if err != nil {
+		return 0, fmt.Errorf("Неверное второе число")
+	}
+
+	switch op {
+	case "+":
+		result = add(a, b)
+	case "-":
+		result = subtract(a, b)
+	case "*": 
+		result = multiply(a, b)
+	case "/":
+		result = divide(a,b)
+	case "**":
+		result = power(a, b)
+	case "%":
+		result = modulus(a, b)			
+	}
+	return result, nil
+}
+func main() {
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Welcome to calculator")
+	fmt.Println("Можете ввести то что вы хотите посчитать")
+
+	for {
+		fmt.Print("> ")
+		scanner.Scan()
+
+		expression := scanner.Text()
+
+		if strings.TrimSpace(expression) == "end" {
+			fmt.Println("Завершение работы калькулятора.")
+			break
+		}
+
+		result, err := calculate(expression)
+		if err != nil {
+			fmt.Println("Ошибка", err)
+		} else {
+			fmt.Printf("Результат: %.2f\n", result)
+		}
+	}
 }
